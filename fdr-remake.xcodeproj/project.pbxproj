@@ -28,7 +28,7 @@
 		21EDEBBD2B2CC90400394103 /* main.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = main.hpp; sourceTree = "<group>"; };
 		21EDEBC22B2CC94000394103 /* fdr-remake */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "fdr-remake"; sourceTree = BUILT_PRODUCTS_DIR; };
 		21EDEBCB2B2CCAC600394103 /* fdr-remake.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "fdr-remake.entitlements"; sourceTree = "<group>"; };
-		21EDEBD62B2CFCE000394103 /* rcon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rcon.h; sourceTree = "<group>"; };
+		21EDEBD62B2CFCE000394103 /* rcon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rcon.h; sourceTree = "<group>"; usesTabs = 1; };
 		21EDEBD72B2CFDD000394103 /* rcon.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = rcon.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -230,6 +230,7 @@
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DDPP_CORO",
+					"-v",
 				);
 				OTHER_LDFLAGS = "-ldpp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -296,6 +297,7 @@
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DDPP_CORO",
+					"-v",
 				);
 				OTHER_LDFLAGS = "-ldpp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
