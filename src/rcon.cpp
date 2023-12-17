@@ -118,8 +118,8 @@ void rcon::form_packet(unsigned char packet[], const std::string& data, int32_t 
 		return;
 	}
     
-	bzero(packet, data_size);
-    
+	//bzero(packet, data_size);
+
 	// Each part is 4 bytes, so we allocate each part 4 bytes away.
 	packet[0] = data_size;
 	packet[4] = id;

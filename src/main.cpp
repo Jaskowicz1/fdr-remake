@@ -1,6 +1,7 @@
 #include "../include/main.h"
 
 #include "../include/rcon.h"
+
 #include <dpp/dpp.h>
 
 int main(int argc, char *argv[]) {
