@@ -37,15 +37,17 @@ admin_role=<role_id>
 
 Look at the section below for more information on the config.
 
+From here, you can do `./fdr` and you should see FDR up and running! If everything went well, FDR should have sent a message in your Factorio and Discord chat!
+
 ---
 
 ## Configuration Information
 
 This section will tell you what each part of the config means.
 
-`ip`, `port`, and `pass`, are your RCON connection config lines. These are essential for making sure FDR can connect to your Factorio server.
-`bot_token` is the Discord bot's token that you want to use for this.
-`msg_channel` is the ID of the channel that will be used for sending and receiving messages.
-`allow_achievements` is either `true` or `false`. If true (default), messages will be prefixed with `<server>:`. If false, messages will look tidier.
-`console_log_path` should be pointing to a `factorio-current.log`. You can look at [this guide](https://wiki.factorio.com/Application_directory#User_data_directory) by the Factorio wiki to see where it's located.
-`admin_role` is the ID of a role that is allowed to execute the `/command <any_factorio_command>` command in Discord.
+- `ip`, `port`, and `pass`, are your RCON connection config lines. These are essential for making sure FDR can connect to your Factorio server.
+- `bot_token` is the Discord bot's token that you want to use for this.
+- `msg_channel` is the ID of the channel that will be used for sending and receiving messages.
+- `allow_achievements` is either `true` or `false`. If true (default), messages will be prefixed with `<server>:`. If false, messages will look tidier.
+- `console_log_path` should be pointing to a `factorio-current.log`. You can look at [this guide](https://wiki.factorio.com/Application_directory#User_data_directory) by the Factorio wiki to see where it's located.
+- `admin_role` is the ID of a role that is allowed to execute the `/command <any_factorio_command>` command in Discord.
