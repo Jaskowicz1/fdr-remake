@@ -1,6 +1,16 @@
+# IDE stuff
+.idea
+.vs
+
+# Build directories
+_build
+build
+cmake-build-debug
+
+# Xcode stuff
 *.xcworkspace
 *.xcuserdatad
 *.xcscheme
-_build
-build
+
+# Apple stuff.
 .DS_Store

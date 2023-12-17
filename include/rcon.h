@@ -14,10 +14,21 @@
 #define HEADER_SIZE 14
 
 enum data_type {
-    SERVERDATA_AUTH = 3,
-    SERVERDATA_AUTH_RESPONSE = 2,
-    SERVERDATA_EXECCOMMAND = 2,
-    SERVERDATA_RESPONSE_VALUE = 0
+	/**
+	 * @brief A command packet.
+	 *
+	 * @note The server *may* send a `SERVERDATA_RESPONSE_VALUE` packet if the request was successful.
+	 * However, The server can also not send a packet back if it only processes the packet and does nothing else.
+	 * You should take this into account by either not using the callback or by turning feedback off.
+	 */
+	SERVERDATA_EXECCOMMAND = 2,
+
+	/**
+	 * @brief An authorisation packet.
+	 *
+	 * The server will send an empty `SERVERDATA_AUTH_RESPONSE` packet if the request was successful.
+	 */
+	SERVERDATA_AUTH = 3,
 };
 
 struct rcon_packet {
@@ -35,11 +46,11 @@ struct rcon_queued_request {
 };
 
 class rcon {
-    const std::string address;
-    const unsigned int port;
-    const std::string password;
-    unsigned int sock{0};
-    bool connected{false};
+	const std::string address;
+	const unsigned int port;
+	const std::string password;
+	unsigned int sock{0};
+	bool connected{false};
 	
 	std::vector<rcon_queued_request> requests_queued{};
     
@@ -51,7 +62,7 @@ public:
 	 * @note This is a blocking call (done on purpose). It needs to wait to connect to the RCON server before anything else happens.
 	 * It will timeout after 4 seconds if it can't connect.
 	 */
-    rcon(const std::string& addr, const unsigned int _port, const std::string& pass);
+	rcon(const std::string& addr, const unsigned int _port, const std::string& pass);
     
 	/**
 	 * @brief Send data to the connected RCON server. Requests from this function are added to a queue (`requests_queued`) and are handled by a different thread.
@@ -76,18 +87,18 @@ public:
 	 *
 	 * @returns Data given by the server from the request.
 	 */
-    const std::string send_data_sync(const std::string data, const int32_t id, data_type type, bool feedback = true);
+	const std::string send_data_sync(const std::string data, const int32_t id, data_type type, bool feedback = true);
     
 private:
     
-    /**
-     * @brief Connects to RCON using `address`, `port`, and `password`.
-     * Those values are pre-filled when constructing this class.
-     *
-     * @warning This should only ever be called by the constructor.
-     * The constructor calls this function once it has filled in the required data and proceeds to login.
-     */
-    bool connect();
+	/**
+	 * @brief Connects to RCON using `address`, `port`, and `password`.
+	 * Those values are pre-filled when constructing this class.
+	 *
+	 * @warning This should only ever be called by the constructor.
+	 * The constructor calls this function once it has filled in the required data and proceeds to login.
+	 */
+	bool connect();
     
 	/**
 	 * @brief Form a valid RCON packet.
@@ -106,22 +117,22 @@ private:
 	 *
 	 * @return Data given by the server.
 	 */
-    std::string receive_information(int32_t id);
+    	std::string receive_information(int32_t id);
     
 	/**
 	 * @brief Gathers all the packet's content (based on the length returned by `read_packet_length`)
 	 */
-	const rcon_packet read_packet();
+	rcon_packet read_packet();
     
-    inline const size_t read_packet_length() {
-        unsigned char* buffer = new unsigned char[4]{0};
-        ::recv(sock, buffer, 4, 0);
-        const size_t len = byte32_to_int(buffer);
-        delete[] buffer;
-        return len;
-    }
+	inline const size_t read_packet_length() {
+		unsigned char* buffer = new unsigned char[4]{0};
+		::recv(sock, buffer, 4, 0);
+		const size_t len = byte32_to_int(buffer);
+		delete[] buffer;
+		return len;
+	}
 
-    inline const size_t byte32_to_int(unsigned char* buffer) {
-        return static_cast<size_t>(buffer[0] | buffer[1] << 8 | buffer[2] << 16 | buffer[3] << 24);
-    }
+	inline const size_t byte32_to_int(unsigned char* buffer) {
+		return static_cast<size_t>(buffer[0] | buffer[1] << 8 | buffer[2] << 16 | buffer[3] << 24);
+	}
 };
