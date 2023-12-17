@@ -7,8 +7,8 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <chrono>
 #include <thread>
+#include <functional>
 
 #define DEFAULT_TIMEOUT 4
 #define HEADER_SIZE 14
