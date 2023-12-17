@@ -1,13 +1,6 @@
 #pragma once
 
-#include <iostream>
 #include <string>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <thread>
 #include <functional>
 
 #define DEFAULT_TIMEOUT 4
@@ -124,13 +117,7 @@ private:
 	 */
 	rcon_packet read_packet();
     
-	inline const size_t read_packet_length() {
-		unsigned char* buffer = new unsigned char[4]{0};
-		::recv(sock, buffer, 4, 0);
-		const size_t len = byte32_to_int(buffer);
-		delete[] buffer;
-		return len;
-	}
+	const size_t read_packet_length();
 
 	inline const size_t byte32_to_int(unsigned char* buffer) {
 		return static_cast<size_t>(buffer[0] | buffer[1] << 8 | buffer[2] << 16 | buffer[3] << 24);

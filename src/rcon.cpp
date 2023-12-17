@@ -1,6 +1,13 @@
 #include "../include/rcon.h"
 
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <iostream>
 #include <cstring>
+#include <thread>
 
 rcon::rcon(const std::string& addr, const unsigned int _port, const std::string& pass) : address(addr), port(_port), password(pass) {
     
@@ -168,4 +175,12 @@ rcon_packet rcon::read_packet() {
 	} while(bytes < packet_length);
 
 	return {bytes, buffer};
+}
+
+const size_t rcon::read_packet_length() {
+	unsigned char* buffer = new unsigned char[4]{0};
+	::recv(sock, buffer, 4, 0);
+	const size_t len = byte32_to_int(buffer);
+	delete[] buffer;
+	return len;
 }
