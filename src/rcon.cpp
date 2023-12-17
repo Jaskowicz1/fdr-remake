@@ -1,5 +1,7 @@
 #include "../include/rcon.h"
 
+#include <cstring>
+
 rcon::rcon(const std::string& addr, const unsigned int _port, const std::string& pass) : address(addr), port(_port), password(pass) {
     
 	std::cout << "Attempting connection to RCON server..." << "\n";
@@ -120,7 +122,7 @@ void rcon::form_packet(unsigned char packet[], const std::string& data, int32_t 
 
 	(memset(packet, '\0', data_size), (void) 0);
 
-	// Each part is 4 bytes, so we allocate each part 4 bytes away.
+	// Each part is 4 bytes
 	packet[0] = data_size;
 	packet[4] = id;
 	packet[8] = type;
