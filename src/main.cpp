@@ -85,24 +85,24 @@ int main() {
 
 	bot.on_slashcommand([&rcon_client](const dpp::slashcommand_t& event) {
 		if (event.command.get_command_name() == "evolution") {
-    			rcon_client.send_data("/evolution", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const std::string& data) {
-				event.reply(dpp::message(data).set_flags(dpp::m_ephemeral));
+    			rcon_client.send_data("/evolution", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const rcon_response& response) {
+				event.reply(dpp::message(response.data).set_flags(dpp::m_ephemeral));
 	    		});
 		} else if (event.command.get_command_name() == "time") {
-	    		rcon_client.send_data("/time", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const std::string& data) {
-				event.reply(dpp::message("Server uptime: " + data).set_flags(dpp::m_ephemeral));
+	    		rcon_client.send_data("/time", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const rcon_response& response) {
+				event.reply(dpp::message("Server uptime: " + response.data).set_flags(dpp::m_ephemeral));
 	    		});
 		} else if (event.command.get_command_name() == "version") {
-	    		rcon_client.send_data("/version", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const std::string& data) {
-				event.reply(dpp::message("Factorio version: " + data).set_flags(dpp::m_ephemeral));
+	    		rcon_client.send_data("/version", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const rcon_response& response) {
+				event.reply(dpp::message("Factorio version: " + response.data).set_flags(dpp::m_ephemeral));
 	    		});
 		} else if (event.command.get_command_name() == "players") {
-	    		rcon_client.send_data("/players online", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const std::string& data) {
-				event.reply(dpp::message(data).set_flags(dpp::m_ephemeral));
+	    		rcon_client.send_data("/players online", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const rcon_response& response) {
+				event.reply(dpp::message(response.data).set_flags(dpp::m_ephemeral));
 	    		});
 		} else if (event.command.get_command_name() == "seed") {
-	    		rcon_client.send_data("/seed", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const std::string& data) {
-				event.reply(dpp::message(data).set_flags(dpp::m_ephemeral));
+	    		rcon_client.send_data("/seed", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const rcon_response& response) {
+				event.reply(dpp::message(response.data).set_flags(dpp::m_ephemeral));
 	    		});
 		} else if (event.command.get_command_name() == "command") {
 			if(FDR::config.allow_achievements) {
@@ -117,12 +117,12 @@ int main() {
 
 			auto command_to_run = std::get<std::string>(event.get_parameter("cmd"));
 
-			rcon_client.send_data("/command " + command_to_run, 3, data_type::SERVERDATA_EXECCOMMAND, [event](const std::string& data) {
-				if(data.empty()) {
+			rcon_client.send_data("/command " + command_to_run, 3, data_type::SERVERDATA_EXECCOMMAND, [event](const rcon_response& response) {
+				if(response.data.empty()) {
 					return;
 				}
 
-				event.reply(dpp::message(data).set_flags(dpp::m_ephemeral));
+				event.reply(dpp::message(response.data).set_flags(dpp::m_ephemeral));
 		    	});
 		}
 	});
@@ -144,8 +144,8 @@ int main() {
 		}
 
 		rcon_client.send_data("/players online count", 2, data_type::SERVERDATA_EXECCOMMAND,
-				      [&bot](const std::string& data) {
-			std::string players = data;
+				      [&bot](const rcon_response& response) {
+			std::string players = response.data;
 			std::replace(players.begin(), players.end(), ':', ' ');
 			std::replace(players.begin(), players.end(), '(', ' ');
 			std::replace(players.begin(), players.end(), ')', ' ');
@@ -154,8 +154,8 @@ int main() {
 
 		/* Create a timer that runs every 120 seconds, that sets the status */
 		bot.start_timer([&bot, &rcon_client](const dpp::timer& timer) {
-			rcon_client.send_data("/players online count", 2, data_type::SERVERDATA_EXECCOMMAND, [&bot](const std::string& data) {
-				std::string players = data;
+			rcon_client.send_data("/players online count", 2, data_type::SERVERDATA_EXECCOMMAND, [&bot](const rcon_response& response) {
+				std::string players = response.data;
 				std::replace(players.begin(), players.end(), ':', ' ');
 				std::replace(players.begin(), players.end(), '(', ' ');
 				std::replace(players.begin(), players.end(), ')', ' ');

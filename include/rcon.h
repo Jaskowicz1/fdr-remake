@@ -27,19 +27,25 @@ enum data_type {
 struct rcon_packet {
 	unsigned int bytes;
 	unsigned char* data;
+	bool server_responded;
 
 	~rcon_packet() {
 		delete[] data;
 	}
 };
 
+struct rcon_response {
+	std::string data;
+	bool server_responded;
+};
+
 struct rcon_queued_request {
 	std::string data;
 	int32_t id;
 	data_type type;
-	std::function<void(const std::string& retrieved_data)> callback;
+	std::function<void(const rcon_response& response)> callback;
 
-	rcon_queued_request(const std::string& _data, const int32_t _id, const data_type _type, std::function<void(const std::string& retrieved_data)> _callback) : data(_data), id(_id), type(_type), callback(_callback) {}
+	rcon_queued_request(const std::string& _data, const int32_t _id, const data_type _type, std::function<void(const rcon_response& retrieved_data)> _callback) : data(_data), id(_id), type(_type), callback(_callback) {}
 };
 
 class rcon {
@@ -70,7 +76,7 @@ public:
 	 *
 	 * @warning If you are expecting no response from the server, do NOT use the callback. You will halt the RCON process until the next received message (which will chain).
 	 */
-	void send_data(const std::string& data, const int32_t id, data_type type, std::function<void(const std::string& retrieved_data)> callback = {});
+	void send_data(const std::string& data, const int32_t id, data_type type, std::function<void(const rcon_response& retrieved_data)> callback = {});
     
 	/**
 	 * @brief Send data to the connected RCON server.
@@ -80,11 +86,11 @@ public:
 	 * @param type The type of packet to send.
 	 * @param feedback Should the client expect a message back from the server? (optional, default is true).
 	 *
-	 * @warning If you are expecting no response from the server, set `feedback` to false. Otherwise, you will halt the RCON process until the next received message (which will chain).
+	 * @warning If you are expecting no response from the server, set `feedback` to false. Otherwise, you will halt the RCON process for 4 seconds.
 	 *
 	 * @returns Data given by the server from the request.
 	 */
-	const std::string send_data_sync(const std::string data, const int32_t id, data_type type, bool feedback = true);
+	const rcon_response send_data_sync(const std::string data, const int32_t id, data_type type, bool feedback = true);
     
 private:
     
@@ -114,7 +120,7 @@ private:
 	 *
 	 * @return Data given by the server.
 	 */
-    	std::string receive_information(int32_t id);
+	rcon_response receive_information(int32_t id, data_type type);
     
 	/**
 	 * @brief Gathers all the packet's content (based on the length returned by `read_packet_length`)
@@ -123,7 +129,7 @@ private:
     
 	const size_t read_packet_length();
 
-	inline const size_t byte32_to_int(unsigned char* buffer) {
-		return static_cast<size_t>(buffer[0] | buffer[1] << 8 | buffer[2] << 16 | buffer[3] << 24);
+	inline const int byte32_to_int(unsigned char* buffer) {
+		return static_cast<int>(buffer[0] | buffer[1] << 8 | buffer[2] << 16 | buffer[3] << 24);
 	}
 };
