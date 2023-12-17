@@ -2,18 +2,67 @@
 
 #include "../include/rcon.h"
 
-#include <dpp/dpp.h>
+#include <iostream>
+#include <fstream>
 
 int main(int argc, char *argv[]) {
 
-	// ./fdr ip port password bot_token channel_id
-	if(argc < 6) {
-		std::cout << "Not enough arguments specified. Please check the command you are running." << "\n";
+	std::ifstream config_file("config.cfg");
+	std::string config_line{};
+
+	std::string ip;
+	unsigned int port;
+	std::string pass;
+	std::string bot_token;
+
+	if (!config_file.good()) {
+		std::cout << "Config file doesn't exist. Please create a config.cfg and follow the README.md on how to fill it.";
 		return 0;
 	}
-    
-	unsigned int port = std::atoi(argv[2]);
-	const dpp::snowflake msg_channel{argv[5]};
+
+	while (std::getline(config_file, config_line)) {
+		std::string temp_line = config_line;
+
+		if (temp_line.rfind("ip=", 0) == 0) {
+			temp_line.replace(temp_line.find("ip="), sizeof("ip=") - 1, "");
+			ip = temp_line;
+		} else if (temp_line.rfind("port=", 0) == 0) {
+			temp_line.replace(temp_line.find("port="), sizeof("port=") - 1, "");
+			port = std::stoi(temp_line);
+		} else if (temp_line.rfind("pass=", 0) == 0) {
+			temp_line.replace(temp_line.find("pass="), sizeof("pass=") - 1, "");
+			pass = temp_line;
+		} else if (temp_line.rfind("bot_token=", 0) == 0) {
+			temp_line.replace(temp_line.find("bot_token="), sizeof("bot_token=") - 1, "");
+			bot_token = temp_line;
+		} else if (temp_line.rfind("msg_channel=", 0) == 0) {
+			temp_line.replace(temp_line.find("msg_channel="), sizeof("msg_channel=") - 1, "");
+			ip = temp_line;
+		} else if (temp_line.rfind("allow_achievements=", 0) == 0) {
+			temp_line.replace(temp_line.find("allow_achievements="), sizeof("allow_achievements=") - 1, "");
+			FDR::config.allow_achievements = (temp_line == "true");
+
+			if(!FDR::config.allow_achievements) {
+				std::cout << "Warning: Achievements will now be disabled for your server." << "\n";
+			}
+		} else if (temp_line.rfind("console_log_path=", 0) == 0) {
+			temp_line.replace(temp_line.find("console_log_path="), sizeof("console_log_path=") - 1, "");
+			FDR::config.server_path = temp_line;
+
+			std::cout << "Found console path. Checking if path exists." << "\n";
+
+			if(!std::ifstream(FDR::config.server_path).good()) {
+				std::cout << "Console path does not exist. FDR will only be able to communicate to Factorio and will not receive any input from Factorio." << "\n";
+				FDR::config.can_communicate_to_console = false;
+			} else {
+				std::cout << "Console path exists. FDR run at full functionality!" << "\n";
+				FDR::config.can_communicate_to_console = true;
+			}
+		} else if (temp_line.rfind("admin_role=", 0) == 0) {
+			temp_line.replace(temp_line.find("admin_role="), sizeof("admin_role=") - 1, "");
+			FDR::config.admin_role = temp_line;
+		}
+	}
     
 	rcon rcon_client{argv[1], port, argv[3]};
     
@@ -22,8 +71,12 @@ int main(int argc, char *argv[]) {
 	/* Output simple log messages to stdout */
 	bot.on_log(dpp::utility::cout_logger());
     
-	bot.on_message_create([&rcon_client, msg_channel](const dpp::message_create_t& event) {
-		if(event.msg.channel_id == msg_channel && !event.msg.author.is_bot()) {
+	bot.on_message_create([&rcon_client](const dpp::message_create_t& event) {
+		if (event.msg.author.is_bot()) {
+			return;
+		}
+
+		if (event.msg.channel_id == FDR::config.msg_channel) {
 			// ID here doesn't matter really, we're not wanting a response.
 			rcon_client.send_data(event.msg.content, 999, data_type::SERVERDATA_EXECCOMMAND);
 		}
@@ -94,6 +147,8 @@ int main(int argc, char *argv[]) {
 				bot.set_presence(dpp::presence(dpp::presence_status::ps_online, dpp::at_custom, players));
 	    		});
 		}, 120);
+
+		rcon_client.send_data("Factorio-Discord-Relay (FDR) has loaded.", 999, data_type::SERVERDATA_EXECCOMMAND);
 	});
 
     	bot.start(dpp::st_wait);
