@@ -105,6 +105,11 @@ int main() {
 				event.reply(dpp::message(data).set_flags(dpp::m_ephemeral));
 	    		});
 		} else if (event.command.get_command_name() == "command") {
+			if(FDR::config.allow_achievements) {
+				event.reply(dpp::message("Since achievements are enabled, you are not allowed to run this command!").set_flags(dpp::m_ephemeral));
+				return;
+			}
+
 			if (std::find(event.command.member.get_roles().begin(), event.command.member.get_roles().end(), FDR::config.admin_role) == event.command.member.get_roles().end()) {
 				event.reply(dpp::message("You do not have the required role to run this command!").set_flags(dpp::m_ephemeral));
 				return;
@@ -113,6 +118,10 @@ int main() {
 			auto command_to_run = std::get<std::string>(event.get_parameter("cmd"));
 
 			rcon_client.send_data("/command " + command_to_run, 3, data_type::SERVERDATA_EXECCOMMAND, [event](const std::string& data) {
+				if(data.empty()) {
+					return;
+				}
+
 				event.reply(dpp::message(data).set_flags(dpp::m_ephemeral));
 		    	});
 		}
@@ -154,9 +163,9 @@ int main() {
 	    		});
 		}, 120);
 
-		rcon_client.send_data("Factorio-Discord-Relay (FDR) has loaded!", 999, data_type::SERVERDATA_EXECCOMMAND);
-
-		bot.message_create(dpp::message(FDR::config.msg_channel, "Factorio-Discord-Relay (FDR) has loaded!"));
+		bot.message_create(dpp::message(FDR::config.msg_channel, "Factorio-Discord-Relay (FDR) has loaded!"), [&rcon_client](const dpp::confirmation_callback_t& callback) {
+			rcon_client.send_data("Factorio-Discord-Relay (FDR) has loaded!", 999, data_type::SERVERDATA_EXECCOMMAND);
+		});
 	});
 
     	bot.start(dpp::st_wait);

@@ -92,13 +92,14 @@ bool rcon::connect() {
 	// Make it non-blocking.
 	fcntl(sock, F_SETFL, O_NONBLOCK);
 
-	// Set a timeout of 4 milliseconds.
-	struct timeval tv;
+	// Set a timeout of 4 seconds.
+	struct timeval tv{};
 	tv.tv_sec = 4;
 	tv.tv_usec = 0;
 	fd_set fds;
 	FD_ZERO(&fds);
 	FD_SET(sock, &fds);
+	setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 
 	// Create temp status
 	int status = -1;
@@ -110,7 +111,7 @@ bool rcon::connect() {
 		}
 	}
 
-	status = select(sock +1, NULL, &fds, NULL, &tv);
+	status = select(sock +1, nullptr, &fds, nullptr, &tv);
 	fcntl(sock, F_SETFL, fcntl(sock, F_GETFL, 0) & ~O_NONBLOCK);
 
 	// If status wasn't zero, we successfully connected.
@@ -119,7 +120,7 @@ bool rcon::connect() {
 
 void rcon::form_packet(unsigned char packet[], const std::string& data, int32_t id, int32_t type) {
 	const char nullbytes[] = {'\x00', '\x00'};
-	const int32_t min_size = sizeof(id) + sizeof(type) + sizeof(nullbytes);
+	const int32_t min_size = sizeof(id) + sizeof(type) + sizeof(nullbytes); // 10 bytes.
 	const int32_t data_size = static_cast<int32_t>(data.size()) + min_size;
     
 	if(data_size > 4096) {
@@ -134,13 +135,10 @@ void rcon::form_packet(unsigned char packet[], const std::string& data, int32_t 
 	packet[4] = id;
 	packet[8] = type;
 
-	int write_nullbytes_at{0};
-
 	const char* data_chars = data.c_str();
 
 	for(int i = 0; i < data_size; i++) {
 		packet[12 + i] = data_chars[i];
-		write_nullbytes_at = 13 + i;
 	}
 }
 
@@ -149,6 +147,11 @@ std::string rcon::receive_information(int32_t id) {
 	// it should really just keep going for a certain amount of seconds.
 	for(int i=0; i < 500; i++) {
 		rcon_packet packet = read_packet();
+
+		if(packet.bytes == 0) {
+			return "";
+		}
+
 		unsigned char* buffer = packet.data;
 
 		int offset = packet.bytes - HEADER_SIZE + 3;
@@ -167,11 +170,25 @@ std::string rcon::receive_information(int32_t id) {
 
 rcon_packet rcon::read_packet() {
 	size_t packet_length = read_packet_length();
+
+	if(packet_length == 0) {
+		return {0, nullptr};
+	}
+
 	auto* buffer = new unsigned char[packet_length]{0};
 	unsigned int bytes = 0;
 
 	do {
-		bytes += ::recv(sock, buffer, packet_length - bytes, 0);
+		size_t recv_bytes = ::recv(sock, buffer, packet_length - bytes, 0);
+		if(recv_bytes == -1) {
+			if ((errno != EAGAIN) && (errno != EWOULDBLOCK)) {
+				std::cout << "Did not receive a packet in time. Did the server send a response?";
+				return {0, nullptr};
+			}
+		}
+
+		bytes += recv_bytes;
+
 	} while(bytes < packet_length);
 
 	return {bytes, buffer};
@@ -179,7 +196,13 @@ rcon_packet rcon::read_packet() {
 
 const size_t rcon::read_packet_length() {
 	unsigned char* buffer = new unsigned char[4]{0};
-	::recv(sock, buffer, 4, 0);
+	size_t recv_bytes = ::recv(sock, buffer, 4, 0);
+	if(recv_bytes == -1) {
+		if ((errno != EAGAIN) && (errno != EWOULDBLOCK)) {
+			std::cout << "Did not receive a packet in time. Did the server send a response?";
+			return 0;
+		}
+	}
 	const size_t len = byte32_to_int(buffer);
 	delete[] buffer;
 	return len;

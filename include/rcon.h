@@ -27,6 +27,10 @@ enum data_type {
 struct rcon_packet {
 	unsigned int bytes;
 	unsigned char* data;
+
+	~rcon_packet() {
+		delete[] data;
+	}
 };
 
 struct rcon_queued_request {
@@ -42,7 +46,7 @@ class rcon {
 	const std::string address;
 	const unsigned int port;
 	const std::string password;
-	unsigned int sock{0};
+	int sock{0};
 	bool connected{false};
 	
 	std::vector<rcon_queued_request> requests_queued{};
