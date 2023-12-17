@@ -5,13 +5,19 @@ FDR is a simple executable (NOT a Factorio mod) which allows you to connect your
 
 #### Powered by [rconpp](https://github.com/Jaskowicz1/rconpp)
 
+### Features
+
+- Support for all commands.
+- Achievements still enabled when installed.
+- Talk to Discord from Factorio and vice versa.
+
 ---
 
 ## Requirements
 
 - [D++](https://github.com/brainboxdotcc/DPP/) (10.0.29 or higher).
 - A Factorio Server.
-- A Discord Bot with the `Message Content` intent on.
+- A Discord Bot with the `Message Content` and the `Server Members` intent on.
 - A channel for messages.
 - RCON enabled on the Factorio server (Add `--rcon-port <port (recommend: 27015)> --rcon-password <password>` to the arguments when running the server).
 
@@ -35,11 +41,7 @@ console_log_path=<log_path>
 admin_role=<role_id>
 ```
 
-Look at the section below for more information on the config.
-
 From here, you can do `./fdr` and you should see FDR up and running! If everything went well, FDR should have sent a message in your Factorio and Discord chat!
-
----
 
 ## Configuration Information
 

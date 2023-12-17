@@ -5,8 +5,7 @@
 #include <iostream>
 #include <fstream>
 
-int main(int argc, char *argv[]) {
-
+int main() {
 	std::ifstream config_file("config.cfg");
 	std::string config_line{};
 
@@ -37,7 +36,7 @@ int main(int argc, char *argv[]) {
 			bot_token = temp_line;
 		} else if (temp_line.rfind("msg_channel=", 0) == 0) {
 			temp_line.replace(temp_line.find("msg_channel="), sizeof("msg_channel=") - 1, "");
-			ip = temp_line;
+			FDR::config.msg_channel = temp_line;
 		} else if (temp_line.rfind("allow_achievements=", 0) == 0) {
 			temp_line.replace(temp_line.find("allow_achievements="), sizeof("allow_achievements=") - 1, "");
 			FDR::config.allow_achievements = (temp_line == "true");
@@ -55,7 +54,7 @@ int main(int argc, char *argv[]) {
 				std::cout << "Console path does not exist. FDR will only be able to communicate to Factorio and will not receive any input from Factorio." << "\n";
 				FDR::config.can_communicate_to_console = false;
 			} else {
-				std::cout << "Console path exists. FDR run at full functionality!" << "\n";
+				std::cout << "Console path exists. FDR can now run at full functionality!" << "\n";
 				FDR::config.can_communicate_to_console = true;
 			}
 		} else if (temp_line.rfind("admin_role=", 0) == 0) {
@@ -63,10 +62,12 @@ int main(int argc, char *argv[]) {
 			FDR::config.admin_role = temp_line;
 		}
 	}
+
+	std::cout << "Configuration loaded. Starting FDR." << "\n";
     
-	rcon rcon_client{argv[1], port, argv[3]};
+	rcon rcon_client{ip, port, pass};
     
-	dpp::cluster bot(argv[4], dpp::i_default_intents | dpp::i_message_content, 0, 0, 1, true, dpp::cache_policy::cpol_none);
+	dpp::cluster bot(bot_token, dpp::i_default_intents | dpp::i_message_content | dpp::i_guild_members, 0, 0, 1, true, dpp::cache_policy::cpol_none);
     
 	/* Output simple log messages to stdout */
 	bot.on_log(dpp::utility::cout_logger());
@@ -89,11 +90,11 @@ int main(int argc, char *argv[]) {
 	    		});
 		} else if (event.command.get_command_name() == "time") {
 	    		rcon_client.send_data("/time", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const std::string& data) {
-				event.reply(dpp::message(data).set_flags(dpp::m_ephemeral));
+				event.reply(dpp::message("Server uptime: " + data).set_flags(dpp::m_ephemeral));
 	    		});
 		} else if (event.command.get_command_name() == "version") {
 	    		rcon_client.send_data("/version", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const std::string& data) {
-				event.reply(dpp::message(data).set_flags(dpp::m_ephemeral));
+				event.reply(dpp::message("Factorio version: " + data).set_flags(dpp::m_ephemeral));
 	    		});
 		} else if (event.command.get_command_name() == "players") {
 	    		rcon_client.send_data("/players online", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const std::string& data) {
@@ -104,6 +105,11 @@ int main(int argc, char *argv[]) {
 				event.reply(dpp::message(data).set_flags(dpp::m_ephemeral));
 	    		});
 		} else if (event.command.get_command_name() == "command") {
+			if (std::find(event.command.member.get_roles().begin(), event.command.member.get_roles().end(), FDR::config.admin_role) == event.command.member.get_roles().end()) {
+				event.reply(dpp::message("You do not have the required role to run this command!").set_flags(dpp::m_ephemeral));
+				return;
+			}
+
 			auto command_to_run = std::get<std::string>(event.get_parameter("cmd"));
 
 			rcon_client.send_data("/command " + command_to_run, 3, data_type::SERVERDATA_EXECCOMMAND, [event](const std::string& data) {
@@ -114,7 +120,7 @@ int main(int argc, char *argv[]) {
 
 	/* Register slash command here in on_ready */
 	bot.on_ready([&bot, &rcon_client](const dpp::ready_t& event) {
-		/* Wrap command registration in run_once to make sure it doesnt run on every full reconnection */
+		/* Wrap command registration in run_once to make sure it doesn't run on every full reconnection */
 		if (dpp::run_once<struct register_bot_commands>()) {
 			dpp::slashcommand evolution_command("evolution", "See the current evolution", bot.me.id);
 			dpp::slashcommand time_command("time", "See the current time", bot.me.id);
@@ -148,7 +154,9 @@ int main(int argc, char *argv[]) {
 	    		});
 		}, 120);
 
-		rcon_client.send_data("Factorio-Discord-Relay (FDR) has loaded.", 999, data_type::SERVERDATA_EXECCOMMAND);
+		rcon_client.send_data("Factorio-Discord-Relay (FDR) has loaded!", 999, data_type::SERVERDATA_EXECCOMMAND);
+
+		bot.message_create(dpp::message(FDR::config.msg_channel, "Factorio-Discord-Relay (FDR) has loaded!"));
 	});
 
     	bot.start(dpp::st_wait);

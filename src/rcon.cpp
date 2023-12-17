@@ -46,7 +46,7 @@ const std::string rcon::send_data_sync(const std::string data, const int32_t id,
 	if(!connected) {
 		std::cout << "Cannot send data when not connected." << "\n";
 		return "";
-		}
+	}
     
 	unsigned long long packet_len = data.length() + HEADER_SIZE;
 	unsigned char packet[packet_len];
@@ -80,7 +80,7 @@ bool rcon::connect() {
 	server.sin_addr.s_addr = inet_addr(address.c_str());
 	server.sin_port = htons(port);
 
-	// Make it non blocking.
+	// Make it non-blocking.
 	fcntl(sock, F_SETFL, O_NONBLOCK);
 
 	// Set a timeout of 4 milliseconds.
@@ -117,8 +117,8 @@ void rcon::form_packet(unsigned char packet[], const std::string& data, int32_t 
 		std::cout << "This packet is too big to send. Please generate a smaller packet." << "\n";
 		return;
 	}
-    
-	//bzero(packet, data_size);
+
+	(memset(packet, '\0', data_size), (void) 0);
 
 	// Each part is 4 bytes, so we allocate each part 4 bytes away.
 	packet[0] = data_size;
