@@ -56,5 +56,5 @@ This section will tell you what each part of the config means.
 - `bot_token` is the Discord bot's token that you want to use for this.
 - `msg_channel` is the ID of the channel that will be used for sending and receiving messages.
 - `allow_achievements` is either `true` or `false`. If true (default), messages will be prefixed with `<server>:`. If false, messages will look tidier.
-- `console_log_path` should be pointing to a `factorio-current.log`. You can look at [this guide](https://wiki.factorio.com/Application_directory#User_data_directory) by the Factorio wiki to see where it's located.
+- `console_log_path` should be pointing to a log file created by adding `--console-log=<path>` to your server's arguments. Whatever path you give to that, set `console_log_path` to that.
 - `admin_role` is the ID of a role that is allowed to execute the `/command <any_factorio_command>` command in Discord.

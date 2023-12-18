@@ -81,8 +81,12 @@ int main() {
 		}
 
 		if (event.msg.channel_id == FDR::config.msg_channel) {
-			// ID here doesn't matter really, we're not wanting a response.
-			rcon_client.send_data(event.msg.content, 999, data_type::SERVERDATA_EXECCOMMAND);
+			if(FDR::config.allow_achievements) {
+				// ID here doesn't matter really, we're not wanting a response.
+				rcon_client.send_data(event.msg.content, 999, data_type::SERVERDATA_EXECCOMMAND);
+			} else {
+				rcon_client.send_data("/silent-command game.print(\"[Discord] " + event.msg.author.username + " » " + event.msg.content + "\")", 999, data_type::SERVERDATA_EXECCOMMAND);
+			}
 		}
 	});
 
@@ -199,7 +203,12 @@ int main() {
 		}
 
 		bot.message_create(dpp::message(FDR::config.msg_channel, "Factorio-Discord-Relay (FDR) has loaded!"), [&rcon_client](const dpp::confirmation_callback_t& callback) {
-			rcon_client.send_data("Factorio-Discord-Relay (FDR) has loaded!", 999, data_type::SERVERDATA_EXECCOMMAND);
+			if(FDR::config.allow_achievements) {
+				rcon_client.send_data("Factorio-Discord-Relay (FDR) has loaded!", 999,
+						      data_type::SERVERDATA_EXECCOMMAND);
+			} else {
+				rcon_client.send_data("/silent-command game.print(\"Factorio-Discord-Relay (FDR) has loaded!\")", 999, data_type::SERVERDATA_EXECCOMMAND);
+			}
 		});
 	});
 
@@ -221,28 +230,33 @@ void FDR::read_console() {
 	}
 	console_file.clear();
 
-	last_char_read = console_file.tellg();
-
-	console_file.close();
+	if (last_char_read == 0) {
+		last_char_read = console_file.tellg();
+		console_file.close();
+		return;
+	}
 
 	for (const std::string& log : strings) {
-		std::cout << "log line: " << log << "\n";
 		if (log.find("[JOIN]") != std::string::npos) {
-			std::string msg = dpp::unicode_emoji::green_circle + pretify_log_line(log);
+			std::string msg = std::string(dpp::unicode_emoji::green_circle) + " " + pretify_log_line(log);
 
 			FDR::botRef->message_create(dpp::message(FDR::config.msg_channel, msg));
 		} else if (log.find("[LEAVE]") != std::string::npos) {
-			std::string msg = dpp::unicode_emoji::red_circle + pretify_log_line(log);
+			std::string msg = std::string(dpp::unicode_emoji::red_circle) + " " + pretify_log_line(log);
 
 			FDR::botRef->message_create(dpp::message(FDR::config.msg_channel, msg));
 		} else if (log.find("[CHAT]") != std::string::npos) {
-			std::string msg = dpp::unicode_emoji::speech_balloon + pretify_log_line(log);
+			std::string msg = std::string(dpp::unicode_emoji::speech_balloon) + " " + pretify_log_line(log);
 
 			FDR::botRef->message_create(dpp::message(FDR::config.msg_channel, msg));
 		} else if (log.find("[COMMAND]") != std::string::npos) {
-			std::string msg = dpp::unicode_emoji::keyboard + pretify_log_line(log);
+			std::string msg = std::string(dpp::unicode_emoji::keyboard) + " " + pretify_log_line(log);
 
 			FDR::botRef->message_create(dpp::message(FDR::config.msg_channel, msg));
 		}
 	}
+
+	last_char_read = console_file.tellg();
+
+	console_file.close();
 }
