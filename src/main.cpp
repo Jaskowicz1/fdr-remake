@@ -224,6 +224,7 @@ void FDR::read_console() {
 	console_file.close();
 
 	for (const std::string& log : strings) {
+		std::cout << "log line: " << log << "\n";
 		if (log.find("[JOIN]") != std::string::npos) {
 			std::string msg = dpp::unicode_emoji::green_circle + pretify_log_line(log);
 
