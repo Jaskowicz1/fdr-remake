@@ -3,6 +3,7 @@
 #include "../include/rcon.h"
 
 #include <iostream>
+#include <dpp/unicode_emoji.h>
 #include <fstream>
 
 int main() {
@@ -68,7 +69,9 @@ int main() {
 	rcon rcon_client{ip, port, pass};
     
 	dpp::cluster bot(bot_token, dpp::i_default_intents | dpp::i_message_content | dpp::i_guild_members, 0, 0, 1, true, dpp::cache_policy::cpol_none);
-    
+
+	FDR::botRef = &bot;
+
 	/* Output simple log messages to stdout */
 	bot.on_log(dpp::utility::cout_logger());
     
@@ -83,7 +86,7 @@ int main() {
 		}
 	});
 
-	bot.on_slashcommand([&rcon_client](const dpp::slashcommand_t& event) {
+	bot.on_slashcommand([&bot, &rcon_client](const dpp::slashcommand_t& event) {
 		if (event.command.get_command_name() == "evolution") {
     			rcon_client.send_data("/evolution", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const rcon_response& response) {
 				event.reply(dpp::message(response.data).set_flags(dpp::m_ephemeral));
@@ -124,6 +127,29 @@ int main() {
 
 				event.reply(dpp::message(response.data).set_flags(dpp::m_ephemeral));
 		    	});
+		} else if (event.command.get_command_name() == "info") {
+			dpp::embed embed = dpp::embed()
+				.set_url("https://github.com/Jaskowicz1/fdr-remake")
+				.set_title("Factorio-Discord-Relay (" + bot.me.username + ") - info")
+				.set_colour(dpp::colours::copper)
+				.set_description("")
+				.add_field("Bot Uptime", bot.uptime().to_string(), true)
+				// later...
+				//.add_field("Memory Usage", "M", true)
+				.add_field("Admin role", FDR::config.admin_role.str(), true)
+				.add_field("Message channel", FDR::config.msg_channel.str(), true)
+				.add_field("Allowed Achievements?", FDR::config.allow_achievements ? ":white_check_mark: Yes" : ":x: No", true)
+				.add_field("Is reading console?", FDR::config.can_communicate_to_console ? ":white_check_mark: Yes" : ":x: No", true)
+				.set_footer(dpp::embed_footer{
+					.text = "Requested by " + event.command.usr.format_username(),
+					.icon_url = event.command.usr.get_avatar_url(),
+					.proxy_url = "",
+				})
+				;
+
+			embed.add_field("Library Version", std::string(DPP_VERSION_TEXT), false);
+
+			event.reply(dpp::message().add_embed(embed));
 		}
 	});
 
@@ -137,10 +163,13 @@ int main() {
 			dpp::slashcommand players_command("players", "See the current amount players", bot.me.id);
 			dpp::slashcommand seed_command("seed", "See the current seed", bot.me.id);
 			dpp::slashcommand cmd_command("command", "Run any command!", bot.me.id);
+			dpp::slashcommand info_command("info", "Get information about the bot's status.", bot.me.id);
 
 			cmd_command.add_option(dpp::command_option(dpp::co_string, "cmd", "the command to run!", true));
 
-			bot.global_bulk_command_create({ evolution_command, time_command, version_command, players_command, seed_command, cmd_command });
+			bot.global_bulk_command_create({ evolution_command, time_command, version_command,
+							 players_command, seed_command, cmd_command,
+							 info_command });
 		}
 
 		rcon_client.send_data("/players online count", 2, data_type::SERVERDATA_EXECCOMMAND,
@@ -163,6 +192,12 @@ int main() {
 	    		});
 		}, 120);
 
+		if(FDR::config.can_communicate_to_console) {
+			bot.start_timer([](const dpp::timer& timer) {
+				FDR::read_console();
+			}, 1);
+		}
+
 		bot.message_create(dpp::message(FDR::config.msg_channel, "Factorio-Discord-Relay (FDR) has loaded!"), [&rcon_client](const dpp::confirmation_callback_t& callback) {
 			rcon_client.send_data("Factorio-Discord-Relay (FDR) has loaded!", 999, data_type::SERVERDATA_EXECCOMMAND);
 		});
@@ -170,4 +205,41 @@ int main() {
 
     	bot.start(dpp::st_wait);
     	return 0;
+}
+
+void FDR::read_console() {
+	std::ifstream console_file(FDR::config.server_path);
+
+	if (last_char_read != 0) {
+		console_file.seekg(last_char_read);
+	}
+
+	std::vector<std::string> strings;
+	std::string str;
+	while (std::getline(console_file, str)) {
+		strings.emplace_back(std::move(str));
+	}
+	last_char_read = console_file.tellg();
+
+	console_file.close();
+
+	for (const std::string& log : strings) {
+		if (log.find("[JOIN]") != std::string::npos) {
+			std::string msg = dpp::unicode_emoji::green_circle + pretify_log_line(log);
+
+			FDR::botRef->message_create(dpp::message(FDR::config.msg_channel, msg));
+		} else if (log.find("[LEAVE]") != std::string::npos) {
+			std::string msg = dpp::unicode_emoji::red_circle + pretify_log_line(log);
+
+			FDR::botRef->message_create(dpp::message(FDR::config.msg_channel, msg));
+		} else if (log.find("[CHAT]") != std::string::npos) {
+			std::string msg = dpp::unicode_emoji::speech_balloon + pretify_log_line(log);
+
+			FDR::botRef->message_create(dpp::message(FDR::config.msg_channel, msg));
+		} else if (log.find("[COMMAND]") != std::string::npos) {
+			std::string msg = dpp::unicode_emoji::keyboard + pretify_log_line(log);
+
+			FDR::botRef->message_create(dpp::message(FDR::config.msg_channel, msg));
+		}
+	}
 }

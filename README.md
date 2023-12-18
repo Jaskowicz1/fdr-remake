@@ -11,6 +11,11 @@ FDR is a simple executable (NOT a Factorio mod) which allows you to connect your
 - Achievements still enabled when installed.
 - Talk to Discord from Factorio and vice versa.
 
+### Security Notice
+
+Ideally, you should run this on the same machine as the Factorio server.
+RCON is extremely insecure as it sends all the data as plain text over the network, meaning anyone can see what you're doing.
+
 ---
 
 ## Requirements
