@@ -217,6 +217,7 @@ void FDR::read_console() {
 	std::vector<std::string> strings;
 	std::string str;
 	while (std::getline(console_file, str)) {
+		std::cout << "str: " << str << "\n";
 		strings.emplace_back(std::move(str));
 	}
 	last_char_read = console_file.tellg();
