@@ -3,6 +3,8 @@ Factorio Discord Relay (FDR), remade in C++! You can view the original project [
 
 FDR is a simple executable (NOT a Factorio mod) which allows you to connect your Factorio server to Discord!
 
+Currently, FDR only works for Linux/UNIX.
+
 #### Powered by [rconpp](https://github.com/Jaskowicz1/rconpp)
 
 ### Features
