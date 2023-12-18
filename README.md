@@ -1,5 +1,5 @@
 # Factorio-Discord-Relay Revamped
-Factorio Discord Relay (FDR), remade in C++!
+Factorio Discord Relay (FDR), remade in C++! You can view the original project [here](https://github.com/Jaskowicz1/Factorio-Discord-Relay).
 
 FDR is a simple executable (NOT a Factorio mod) which allows you to connect your Factorio server to Discord!
 
