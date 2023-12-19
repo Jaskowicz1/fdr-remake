@@ -66,7 +66,7 @@ int main() {
 
 	std::cout << "Configuration loaded. Starting FDR." << "\n";
     
-	rcon rcon_client{ip, port, pass};
+	rconpp::rcon rcon_client{ip, port, pass};
     
 	dpp::cluster bot(bot_token, dpp::i_default_intents | dpp::i_message_content | dpp::i_guild_members, 0, 0, 1, true, dpp::cache_policy::cpol_none);
 
@@ -83,32 +83,32 @@ int main() {
 		if (event.msg.channel_id == FDR::config.msg_channel) {
 			if(FDR::config.allow_achievements) {
 				// ID here doesn't matter really, we're not wanting a response.
-				rcon_client.send_data(event.msg.content, 999, data_type::SERVERDATA_EXECCOMMAND);
+				rcon_client.send_data(event.msg.content, 999, rconpp::data_type::SERVERDATA_EXECCOMMAND);
 			} else {
-				rcon_client.send_data("/silent-command game.print(\"[Discord] " + event.msg.author.username + " » " + event.msg.content + "\")", 999, data_type::SERVERDATA_EXECCOMMAND);
+				rcon_client.send_data("/silent-command game.print(\"[Discord] " + event.msg.author.username + " » " + event.msg.content + "\")", 999, rconpp::data_type::SERVERDATA_EXECCOMMAND);
 			}
 		}
 	});
 
 	bot.on_slashcommand([&bot, &rcon_client](const dpp::slashcommand_t& event) {
 		if (event.command.get_command_name() == "evolution") {
-    			rcon_client.send_data("/evolution", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const rcon_response& response) {
+    			rcon_client.send_data("/evolution", 3, rconpp::data_type::SERVERDATA_EXECCOMMAND, [event](const rconpp::response& response) {
 				event.reply(dpp::message(response.data).set_flags(dpp::m_ephemeral));
 	    		});
 		} else if (event.command.get_command_name() == "time") {
-	    		rcon_client.send_data("/time", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const rcon_response& response) {
+	    		rcon_client.send_data("/time", 3, rconpp::data_type::SERVERDATA_EXECCOMMAND, [event](const rconpp::response& response) {
 				event.reply(dpp::message("Server uptime: " + response.data).set_flags(dpp::m_ephemeral));
 	    		});
 		} else if (event.command.get_command_name() == "version") {
-	    		rcon_client.send_data("/version", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const rcon_response& response) {
+	    		rcon_client.send_data("/version", 3, rconpp::data_type::SERVERDATA_EXECCOMMAND, [event](const rconpp::response& response) {
 				event.reply(dpp::message("Factorio version: " + response.data).set_flags(dpp::m_ephemeral));
 	    		});
 		} else if (event.command.get_command_name() == "players") {
-	    		rcon_client.send_data("/players online", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const rcon_response& response) {
+	    		rcon_client.send_data("/players online", 3, rconpp::data_type::SERVERDATA_EXECCOMMAND, [event](const rconpp::response& response) {
 				event.reply(dpp::message(response.data).set_flags(dpp::m_ephemeral));
 	    		});
 		} else if (event.command.get_command_name() == "seed") {
-	    		rcon_client.send_data("/seed", 3, data_type::SERVERDATA_EXECCOMMAND, [event](const rcon_response& response) {
+	    		rcon_client.send_data("/seed", 3, rconpp::data_type::SERVERDATA_EXECCOMMAND, [event](const rconpp::response& response) {
 				event.reply(dpp::message(response.data).set_flags(dpp::m_ephemeral));
 	    		});
 		} else if (event.command.get_command_name() == "command") {
@@ -124,7 +124,7 @@ int main() {
 
 			auto command_to_run = std::get<std::string>(event.get_parameter("cmd"));
 
-			rcon_client.send_data("/command " + command_to_run, 3, data_type::SERVERDATA_EXECCOMMAND, [event](const rcon_response& response) {
+			rcon_client.send_data("/command " + command_to_run, 3, rconpp::data_type::SERVERDATA_EXECCOMMAND, [event](const rconpp::response& response) {
 				if(response.data.empty()) {
 					return;
 				}
@@ -176,8 +176,8 @@ int main() {
 							 info_command });
 		}
 
-		rcon_client.send_data("/players online count", 2, data_type::SERVERDATA_EXECCOMMAND,
-				      [&bot](const rcon_response& response) {
+		rcon_client.send_data("/players online count", 2, rconpp::data_type::SERVERDATA_EXECCOMMAND,
+				      [&bot](const rconpp::response& response) {
 			std::string players = response.data;
 			std::replace(players.begin(), players.end(), ':', ' ');
 			std::replace(players.begin(), players.end(), '(', ' ');
@@ -187,7 +187,7 @@ int main() {
 
 		/* Create a timer that runs every 120 seconds, that sets the status */
 		bot.start_timer([&bot, &rcon_client](const dpp::timer& timer) {
-			rcon_client.send_data("/players online count", 2, data_type::SERVERDATA_EXECCOMMAND, [&bot](const rcon_response& response) {
+			rcon_client.send_data("/players online count", 2, rconpp::data_type::SERVERDATA_EXECCOMMAND, [&bot](const rconpp::response& response) {
 				std::string players = response.data;
 				std::replace(players.begin(), players.end(), ':', ' ');
 				std::replace(players.begin(), players.end(), '(', ' ');
@@ -205,9 +205,9 @@ int main() {
 		bot.message_create(dpp::message(FDR::config.msg_channel, "Factorio-Discord-Relay (FDR) has loaded!"), [&rcon_client](const dpp::confirmation_callback_t& callback) {
 			if(FDR::config.allow_achievements) {
 				rcon_client.send_data("Factorio-Discord-Relay (FDR) has loaded!", 999,
-						      data_type::SERVERDATA_EXECCOMMAND);
+						      rconpp::data_type::SERVERDATA_EXECCOMMAND);
 			} else {
-				rcon_client.send_data("/silent-command game.print(\"Factorio-Discord-Relay (FDR) has loaded!\")", 999, data_type::SERVERDATA_EXECCOMMAND);
+				rcon_client.send_data("/silent-command game.print(\"Factorio-Discord-Relay (FDR) has loaded!\")", 999, rconpp::data_type::SERVERDATA_EXECCOMMAND);
 			}
 		});
 	});
