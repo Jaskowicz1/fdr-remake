@@ -3,17 +3,19 @@ Factorio Discord Relay (FDR), remade in C++! You can view the original project [
 
 FDR is a simple executable (NOT a Factorio mod) which allows you to connect your Factorio server to Discord!
 
-Currently, FDR only works for Linux/UNIX.
-
 #### Powered by [rconpp](https://github.com/Jaskowicz1/rconpp)
 
-### Features
+## Supported Systems
+
+FDR Works for all platforms! That means you can run this on Windows/Linux/UNIX, whatever you like!
+
+## Features
 
 - Support for all commands.
 - Achievements still enabled when installed.
 - Talk to Discord from Factorio and vice versa.
 
-### Security Notice
+## Security Notice
 
 Ideally, you should run this on the same machine as the Factorio server.
 RCON is extremely insecure as it sends all the data as plain text over the network, meaning anyone can see what you're doing.
@@ -31,6 +33,8 @@ RCON is extremely insecure as it sends all the data as plain text over the netwo
 ---
 
 ## Installation
+
+**If you're on Linux/Unix, you need to install D++ first. You can visit [this page](https://dpp.dev/installing.html) to find out how you can install D++ for your OS.**
 
 Download the latest executable from the releases tab.
 
@@ -60,3 +64,15 @@ This section will tell you what each part of the config means.
 - `allow_achievements` is either `true` or `false`. If true (default), messages will be prefixed with `<server>:`. If false, messages will look tidier.
 - `console_log_path` should be pointing to a log file created by adding `--console-log=<path>` to your server's arguments. Whatever path you give to that, set `console_log_path` to that.
 - `admin_role` is the ID of a role that is allowed to execute the `/command <any_factorio_command>` command in Discord.
+
+## Contributing
+
+If you're wanting to contribute to this project, you should follow these steps below to make sure you can test your changes.
+
+First, Install D++ on your system.
+If you're on **Linux/UNIX**, refer to [this page](https://dpp.dev/installing.html) to find out how you can install D++ for your OS.
+If you're on **Windows**, you need to install `dpp` from `VCPKG`. You can follow [this page](https://dpp.dev/install-vcpkg.html) for more information.
+
+Once that's done, fork the project and clone your fork!
+
+Once you've cloned your fork, make a new branch and then commit/push your changes to that new branch. Once you're done, make a pull request!
