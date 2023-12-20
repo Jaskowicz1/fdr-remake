@@ -3,9 +3,9 @@
 .vs
 
 # Build directories
-_build
 build
 cmake-build-debug
+out
 
 # Xcode stuff
 *.xcworkspace

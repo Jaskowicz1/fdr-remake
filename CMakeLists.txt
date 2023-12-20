@@ -9,15 +9,24 @@ add_executable(${PROJECT_NAME}
 	${source_files}
 )
 
-find_package(DPP REQUIRED)
+if(WIN32)
+	find_package(dpp CONFIG REQUIRED)
+	target_link_libraries(${PROJECT_NAME} PRIVATE 
+		dpp::dpp
+		wsock32
+		ws2_32
+	)
+else()
+	find_package(DPP REQUIRED)
 
-target_link_libraries(${PROJECT_NAME}
-	${DPP_LIBRARIES}
-)
+	target_link_libraries(${PROJECT_NAME}
+		${DPP_LIBRARIES}
+	)
 
-target_include_directories(${PROJECT_NAME} PRIVATE
-	${DPP_INCLUDE_DIR}
-)
+	target_include_directories(${PROJECT_NAME} PRIVATE
+		${DPP_INCLUDE_DIR}
+	)
+endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
 	CXX_STANDARD 17

@@ -144,12 +144,7 @@ int main() {
 				.add_field("Message channel", FDR::config.msg_channel.str(), true)
 				.add_field("Allowed Achievements?", FDR::config.allow_achievements ? ":white_check_mark: Yes" : ":x: No", true)
 				.add_field("Is reading console?", FDR::config.can_communicate_to_console ? ":white_check_mark: Yes" : ":x: No", true)
-				.set_footer(dpp::embed_footer{
-					.text = "Requested by " + event.command.usr.format_username(),
-					.icon_url = event.command.usr.get_avatar_url(),
-					.proxy_url = "",
-				})
-				;
+				.set_footer("Requested by " + event.command.usr.format_username(), event.command.usr.get_avatar_url());
 
 			embed.add_field("Library Version", std::string(DPP_VERSION_TEXT), false);
 
