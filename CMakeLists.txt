@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.20)
-project ("FDR" VERSION 0.1 DESCRIPTION "Factorio-Discord-Relay in C++")
+project ("FDR" VERSION 1.0 DESCRIPTION "Factorio-Discord-Relay in C++")
 
 file(GLOB source_files CONFIGURE_DEPENDS "src/*.cpp" "include/*.h")
 
@@ -17,15 +17,11 @@ if(WIN32)
 		ws2_32
 	)
 else()
-	find_package(DPP REQUIRED)
+	set_target_properties(${PROJECT_NAME} PROPERTIES LINK_SEARCH_START_STATIC 1)
+	set_target_properties(${PROJECT_NAME} PROPERTIES LINK_SEARCH_END_STATIC 1)
 
-	target_link_libraries(${PROJECT_NAME}
-		${DPP_LIBRARIES}
-	)
-
-	target_include_directories(${PROJECT_NAME} PRIVATE
-		${DPP_INCLUDE_DIR}
-	)
+	set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+	target_link_libraries(${PROJECT_NAME} libdpp.a)
 endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -33,3 +29,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 	CXX_STANDARD_REQUIRED ON
 )
 
+target_include_directories(${PROJECT_NAME} PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}/include
+)

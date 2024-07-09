@@ -1,6 +1,6 @@
-#include "../include/main.h"
+#include "main.h"
 
-#include "../include/rcon.h"
+#include "rcon.h"
 
 #include <iostream>
 #include <dpp/unicode_emoji.h>

@@ -24,7 +24,7 @@ RCON is extremely insecure as it sends all the data as plain text over the netwo
 
 ## Requirements
 
-- [D++](https://github.com/brainboxdotcc/DPP/) (10.0.29 or higher).
+- D++ 10.0.30 (If you're on Linux, this is automatically packaged with FDR, meaning you do not need D++ installed).
 - A Factorio Server.
 - A Discord Bot with the `Message Content` and the `Server Members` intent on.
 - A channel for messages.

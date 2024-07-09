@@ -5,6 +5,7 @@
 # Build directories
 build
 cmake-build-debug
+cmake-build-release
 out
 
 # Xcode stuff
@@ -17,3 +18,5 @@ out
 
 # Extras
 config.cfg
+
+libdpp.a
