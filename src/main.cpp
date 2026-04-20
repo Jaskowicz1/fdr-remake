@@ -83,7 +83,7 @@ int main() {
 		if (event.msg.channel_id == FDR::config.msg_channel) {
 			if(FDR::config.allow_achievements) {
 				// ID here doesn't matter really, we're not wanting a response.
-				rcon_client.send_data(event.msg.content, 999, rconpp::data_type::SERVERDATA_EXECCOMMAND);
+				rcon_client.send_data("«" + event.msg.author.global_name + "»: " + event.msg.content, 999, rconpp::data_type::SERVERDATA_EXECCOMMAND);
 			} else {
 				rcon_client.send_data("/silent-command game.print(\"[Discord] " + event.msg.author.username + " » " + event.msg.content + "\")", 999, rconpp::data_type::SERVERDATA_EXECCOMMAND);
 			}
